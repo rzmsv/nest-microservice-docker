@@ -1,0 +1,45 @@
+version: '3.5'
+services:
+
+  url-shortner-app:
+    image: url-shortner
+    build:
+      context: ./
+      dockerfile: ./apps/url_shortner/Dockerfile
+    restart: unless-stopped
+    container_name: url-shortner-app
+    # environment:
+    #   WAIT_HOSTS: URLSHR-db:5432
+    volumes:
+      - ./:/app/url_shortner
+      - /app/url_shortner/node_modules
+    command: npm run start:dev url_shortner
+    env_file:
+      - ./apps/url_shortner/.env
+    ports:
+      - 3000:3000
+    networks:
+      - url-shortner-network
+
+  url-shortner-db:
+    image: mongo:5.0
+    container_name: url-shortner-db
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 27017:27017
+    environment:
+      # MONGO_INITDB_DATABASE: authenticator-db
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    networks:
+      - url-shortner-network
+
+networks:
+  url-shortner-network:
+
+
+volumes:
+  mongo_data:
